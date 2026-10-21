@@ -90,6 +90,18 @@ y ambos casos tardan lo mismo: así no se puede averiguar qué usuarios están r
 - Ruta inexistente → `404 { "mensaje": "Ruta no encontrada." }`
 - JSON mal formado → `400 { "mensaje": "El cuerpo de la petición no es un JSON válido." }`
 
+## Pruebas con Postman
+
+La carpeta `postman/` tiene la colección `servicio-registro-login.postman_collection.json`
+(12 peticiones, P-01 a P-12, cada una con sus pruebas) y el entorno `local.postman_environment.json`.
+
+1. `npm run start:memoria` (el servicio empieza sin usuarios).
+2. En Postman: **Import** → seleccionar los dos archivos → elegir el entorno *Local (puerto 3001)*.
+3. Clic derecho en la colección → **Run collection** → **Run**. Deben pasar las 12 peticiones.
+
+También se puede ejecutar sin abrir Postman, con su herramienta de línea de comandos:
+`npx newman run postman/servicio-registro-login.postman_collection.json -e postman/local.postman_environment.json`
+
 ## Ejemplo con curl
 
 ```bash
