@@ -2,7 +2,7 @@
 
 Evidencia **GA7-220501096-AA5-EV01 — Diseño y desarrollo de servicios web (caso)**  
 Programa Análisis y Desarrollo de Software — SENA  
-Autora: **Carlas Elenys Montalvo Mendoza**
+Autores: **Carlas Elenys Montalvo Mendoza** y **Freyder López** · Ficha 3186702
 
 Servicio web REST que permite **registrar** un usuario y **iniciar sesión** con usuario y
 contraseña. Si la autenticación es correcta responde *"Autenticación satisfactoria."*; si no,
@@ -46,12 +46,13 @@ sube al repositorio):
 
 ```bash
 npm install
-npm start        # http://localhost:3001
-npm test         # pruebas automáticas
+npm start              # http://localhost:3001 (usuarios guardados en datos/usuarios.json)
+npm run start:memoria  # igual, pero empieza vacío y no guarda nada (para las pruebas con Postman)
+npm test               # pruebas automáticas
 ```
 
 Variables opcionales: `PUERTO` (por defecto `3001`) y `ARCHIVO_DATOS` (por defecto
-`datos/usuarios.json`).
+`datos/usuarios.json`; vacío = solo en memoria).
 
 ## Endpoints
 

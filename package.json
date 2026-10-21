@@ -2,7 +2,7 @@
   "name": "servicio-registro-login",
   "version": "1.0.0",
   "description": "Servicio web de registro e inicio de sesión (GA7-220501096-AA5-EV01, MediCitas)",
-  "author": "Carlas Elenys Montalvo Mendoza",
+  "author": "Carlas Elenys Montalvo Mendoza y Freyder López",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -12,6 +12,7 @@
   },
   "scripts": {
     "start": "node src/servidor.js",
+    "start:memoria": "ARCHIVO_DATOS= node src/servidor.js",
     "dev": "node --watch src/servidor.js",
     "test": "node --test \"pruebas/**/*.test.js\""
   },
