@@ -1,0 +1,563 @@
+{
+  "info": {
+    "name": "Servicio de registro e inicio de sesión — MediCitas",
+    "description": "Pruebas de la API de la evidencia GA7-220501096-AA5-EV01 (Node.js + Express).\nEvidencia GA7-220501096-AA5-EV02 · Carlas Elenys Montalvo Mendoza y Freyder López · Ficha 3186702.\n\nAntes de ejecutar: `npm run start:memoria` en el proyecto (empieza sin usuarios). Ejecute las peticiones en orden P-01 → P-12 (Run collection).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "P-01 Consultar el servicio",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Lista las rutas del servicio\", () => pm.expect(pm.response.json().rutas).to.eql([\"POST /api/registro\", \"POST /api/login\"]));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": []
+        },
+        "description": "Comprobar que el servicio está arriba y lista sus rutas.\n\nResultado esperado: 200 con el nombre del servicio y sus dos rutas."
+      },
+      "response": []
+    },
+    {
+      "name": "P-02 Registrar usuario nuevo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Usuario registrado correctamente.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Usuario registrado correctamente.\"));",
+              "pm.test(\"Devuelve el usuario registrado\", () => pm.expect(pm.response.json().usuario).to.eql(pm.variables.get(\"usuario\")));",
+              "pm.test(\"No devuelve la contraseña ni su hash\", () => { const c = pm.response.json(); pm.expect(c).to.not.have.property(\"contrasena\"); pm.expect(c).to.not.have.property(\"hashContrasena\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"{{usuario}}\",\n  \"contrasena\": \"{{contrasena}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/registro",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "registro"
+          ]
+        },
+        "description": "Registrar un usuario con datos válidos.\n\nResultado esperado: 201 «Usuario registrado correctamente.» sin devolver la contraseña."
+      },
+      "response": []
+    },
+    {
+      "name": "P-03 Registrar usuario repetido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «El usuario ya está registrado.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"El usuario ya está registrado.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"CARLAS\",\n  \"contrasena\": \"OtraClave2026\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/registro",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "registro"
+          ]
+        },
+        "description": "Intentar registrar otra vez el mismo usuario, escrito en mayúsculas.\n\nResultado esperado: 409 «El usuario ya está registrado.»"
+      },
+      "response": []
+    },
+    {
+      "name": "P-04 Registrar sin datos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Datos inválidos.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Datos inválidos.\"));",
+              "pm.test(\"Indica el error de cada campo\", () => { const e = pm.response.json().errores; pm.expect(e.usuario).to.eql(\"El usuario es obligatorio.\"); pm.expect(e.contrasena).to.eql(\"La contraseña es obligatoria.\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/registro",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "registro"
+          ]
+        },
+        "description": "Enviar el registro vacío.\n\nResultado esperado: 400 «Datos inválidos.» con un error para usuario y otro para contraseña."
+      },
+      "response": []
+    },
+    {
+      "name": "P-05 Registrar con datos inválidos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Datos inválidos.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Datos inválidos.\"));",
+              "pm.test(\"Explica el formato del usuario\", () => pm.expect(pm.response.json().errores.usuario).to.include(\"de 4 a 30 caracteres\"));",
+              "pm.test(\"Explica el largo mínimo de la contraseña\", () => pm.expect(pm.response.json().errores.contrasena).to.include(\"al menos 8 caracteres\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"c a\",\n  \"contrasena\": \"corta\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/registro",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "registro"
+          ]
+        },
+        "description": "Usuario con espacios y de menos de 4 caracteres; contraseña de 5 caracteres.\n\nResultado esperado: 400 con el formato permitido del usuario y el mínimo de 8 caracteres."
+      },
+      "response": []
+    },
+    {
+      "name": "P-06 Registrar con JSON mal formado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «El cuerpo de la petición no es un JSON válido.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"El cuerpo de la petición no es un JSON válido.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"usuario\": \"carlas\", ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/registro",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "registro"
+          ]
+        },
+        "description": "Enviar un cuerpo que no es JSON válido.\n\nResultado esperado: 400 «El cuerpo de la petición no es un JSON válido.»"
+      },
+      "response": []
+    },
+    {
+      "name": "P-07 Iniciar sesión correctamente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Autenticación satisfactoria.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Autenticación satisfactoria.\"));",
+              "pm.test(\"Devuelve el usuario autenticado\", () => pm.expect(pm.response.json().usuario).to.eql(pm.variables.get(\"usuario\")));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"{{usuario}}\",\n  \"contrasena\": \"{{contrasena}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "description": "Autenticarse con el usuario y la contraseña registrados.\n\nResultado esperado: 200 «Autenticación satisfactoria.»"
+      },
+      "response": []
+    },
+    {
+      "name": "P-08 Iniciar sesión con usuario en mayúsculas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Autenticación satisfactoria.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Autenticación satisfactoria.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"Carlas\",\n  \"contrasena\": \"{{contrasena}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "description": "Comprobar que el usuario no distingue mayúsculas de minúsculas.\n\nResultado esperado: 200 «Autenticación satisfactoria.»"
+      },
+      "response": []
+    },
+    {
+      "name": "P-09 Iniciar sesión con contraseña incorrecta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Error en la autenticación: usuario o contraseña incorrectos.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Error en la autenticación: usuario o contraseña incorrectos.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"{{usuario}}\",\n  \"contrasena\": \"ClaveEquivocada1\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "description": "Intentar entrar con una contraseña que no corresponde.\n\nResultado esperado: 401 «Error en la autenticación: usuario o contraseña incorrectos.»"
+      },
+      "response": []
+    },
+    {
+      "name": "P-10 Iniciar sesión con usuario inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Error en la autenticación: usuario o contraseña incorrectos.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Error en la autenticación: usuario o contraseña incorrectos.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"noexiste\",\n  \"contrasena\": \"{{contrasena}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "description": "Intentar entrar con un usuario que no está registrado.\n\nResultado esperado: 401 con el mismo mensaje de P-09 (no revela qué usuarios existen)."
+      },
+      "response": []
+    },
+    {
+      "name": "P-11 Iniciar sesión sin contraseña",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Datos inválidos.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Datos inválidos.\"));",
+              "pm.test(\"Indica que falta la contraseña\", () => pm.expect(pm.response.json().errores.contrasena).to.eql(\"La contraseña es obligatoria.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"{{usuario}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "description": "Enviar el inicio de sesión sin el campo contraseña.\n\nResultado esperado: 400 «Datos inválidos.» con el error de la contraseña."
+      },
+      "response": []
+    },
+    {
+      "name": "P-12 Consultar una ruta inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Código de estado 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Responde en formato JSON\", () => pm.response.to.be.json);",
+              "pm.test(\"Responde en menos de 1 segundo\", () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+              "pm.test(\"Mensaje: «Ruta no encontrada.»\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Ruta no encontrada.\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/usuarios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "usuarios"
+          ]
+        },
+        "description": "Pedir una ruta que el servicio no tiene.\n\nResultado esperado: 404 «Ruta no encontrada.»"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "usuario",
+      "value": "carlas"
+    },
+    {
+      "key": "contrasena",
+      "value": "Medicitas2026"
+    }
+  ]
+}
