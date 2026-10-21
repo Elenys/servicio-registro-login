@@ -1,0 +1,4 @@
+node_modules/
+# Usuarios registrados en ejecución local (contienen hashes de contraseñas)
+/datos/
+.DS_Store
